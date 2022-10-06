@@ -1,6 +1,5 @@
 import Foundation
 import UIKit
-import Hodler
 
 class TransactionCell: UITableViewCell {
     static let dateFormatter: DateFormatter = {
@@ -43,10 +42,6 @@ class TransactionCell: UITableViewCell {
             }
             if let value = to.value {
                 string += "(\((Decimal(value) / coinRate).formattedAmount))"
-            }
-            if let pluginId = to.pluginId, let pluginData = to.pluginData, pluginId == HodlerPlugin.id, let hodlerData = pluginData as? HodlerOutputData {
-                string += "\nLocked Until: \(TransactionCell.dateFormatter.string(from: Date(timeIntervalSince1970: Double(hodlerData.approximateUnlockTime!))))  <-"
-                string += "\nOriginal: \(format(hash: hodlerData.addressString))  <-"
             }
             return string
         }
@@ -109,13 +104,7 @@ class TransactionCell: UITableViewCell {
 extension TransactionCell {
     
     static func rowsCount(address: TransactionInputOutput) -> Int {
-        var rowsCount = 1
-
-        if let pluginId = address.pluginId, pluginId == HodlerPlugin.id {
-            rowsCount += 2
-        }
-        
-        return rowsCount
+        1
     }
 
     static func rowHeight(for transaction: TransactionRecord) -> Int {

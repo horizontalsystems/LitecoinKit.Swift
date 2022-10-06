@@ -9,8 +9,8 @@
 /* Begin PBXBuildFile section */
 		2FA5D47CFAEB8DB143F27645 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DACF4DE83AC5FE512D28 /* Extensions.swift */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
-		6BC11A5628EEAF0D0001FDF1 /* BitcoinKit in Frameworks */ = {isa = PBXBuildFile; productRef = 6BC11A5528EEAF0D0001FDF1 /* BitcoinKit */; };
-		6BC11A5828EEB0DD0001FDF1 /* BitcoinAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BC11A5728EEB0DD0001FDF1 /* BitcoinAdapter.swift */; };
+		6BC11A5D28EEC7D30001FDF1 /* LitecoinAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BC11A5C28EEC7D30001FDF1 /* LitecoinAdapter.swift */; };
+		6BC11A6128EECBE90001FDF1 /* LitecoinKit in Frameworks */ = {isa = PBXBuildFile; productRef = 6BC11A6028EECBE90001FDF1 /* LitecoinKit */; };
 		D36AAA9823A2125E0065B32B /* BaseAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA7F23A2125D0065B32B /* BaseAdapter.swift */; };
 		D36AAA9923A2125E0065B32B /* SendController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D36AAA8123A2125D0065B32B /* SendController.xib */; };
 		D36AAA9A23A2125E0065B32B /* BalanceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA8223A2125D0065B32B /* BalanceController.swift */; };
@@ -35,10 +35,10 @@
 
 /* Begin PBXFileReference section */
 		2FA5DACF4DE83AC5FE512D28 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
-		607FACD01AFB9204008FA782 /* BitcoinKit Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = "BitcoinKit Demo.app"; path = "/Users/ant013/Ios/ HS_PODS/BitcoinKit.Swift/iOS Example/build/Debug-iphoneos/BitcoinKit Demo.app"; sourceTree = "<absolute>"; };
 		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACD51AFB9204008FA782 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		6BC11A5728EEB0DD0001FDF1 /* BitcoinAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinAdapter.swift; sourceTree = "<group>"; };
+		6BC11A5C28EEC7D30001FDF1 /* LitecoinAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LitecoinAdapter.swift; sourceTree = "<group>"; };
+		6BC11A5E28EEC7EC0001FDF1 /* LitecoinKit Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "LitecoinKit Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D36AAA7F23A2125D0065B32B /* BaseAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseAdapter.swift; sourceTree = "<group>"; };
 		D36AAA8123A2125D0065B32B /* SendController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SendController.xib; sourceTree = "<group>"; };
 		D36AAA8223A2125D0065B32B /* BalanceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BalanceController.swift; sourceTree = "<group>"; };
@@ -66,7 +66,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6BC11A5628EEAF0D0001FDF1 /* BitcoinKit in Frameworks */,
+				6BC11A6128EECBE90001FDF1 /* LitecoinKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -77,6 +77,8 @@
 			isa = PBXGroup;
 			children = (
 				607FACD21AFB9204008FA782 /* Sources */,
+				6BC11A5E28EEC7EC0001FDF1 /* LitecoinKit Demo.app */,
+				6BC11A5F28EECBE90001FDF1 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -103,11 +105,18 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		6BC11A5F28EECBE90001FDF1 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		D36AAA7B23A2125D0065B32B /* Adapters */ = {
 			isa = PBXGroup;
 			children = (
 				D36AAA7F23A2125D0065B32B /* BaseAdapter.swift */,
-				6BC11A5728EEB0DD0001FDF1 /* BitcoinAdapter.swift */,
+				6BC11A5C28EEC7D30001FDF1 /* LitecoinAdapter.swift */,
 			);
 			path = Adapters;
 			sourceTree = "<group>";
@@ -168,10 +177,10 @@
 			);
 			name = "iOS Example";
 			packageProductDependencies = (
-				6BC11A5528EEAF0D0001FDF1 /* BitcoinKit */,
+				6BC11A6028EECBE90001FDF1 /* LitecoinKit */,
 			);
-			productName = BitcoinKit;
-			productReference = 607FACD01AFB9204008FA782 /* BitcoinKit Demo.app */;
+			productName = LitecoinKit;
+			productReference = 6BC11A5E28EEC7EC0001FDF1 /* LitecoinKit Demo.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -242,7 +251,7 @@
 				D36AAAA823A2125E0065B32B /* Manager.swift in Sources */,
 				D36AAAA923A2125E0065B32B /* Signal.swift in Sources */,
 				D36AAA9C23A2125E0065B32B /* TransactionCell.swift in Sources */,
-				6BC11A5828EEB0DD0001FDF1 /* BitcoinAdapter.swift in Sources */,
+				6BC11A5D28EEC7D30001FDF1 /* LitecoinAdapter.swift in Sources */,
 				D36AAAA423A2125E0065B32B /* SendController.swift in Sources */,
 				D36AAA9D23A2125E0065B32B /* BalanceCell.swift in Sources */,
 				D36AAA9823A2125E0065B32B /* BaseAdapter.swift in Sources */,
@@ -374,7 +383,7 @@
 				);
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.horizontalsystems.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = "BitcoinKit Demo";
+				PRODUCT_NAME = "LitecoinKit Demo";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 5.0;
 			};
@@ -392,7 +401,7 @@
 				);
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.horizontalsystems.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = "BitcoinKit Demo";
+				PRODUCT_NAME = "LitecoinKit Demo";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 5.0;
 			};
@@ -433,9 +442,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		6BC11A5528EEAF0D0001FDF1 /* BitcoinKit */ = {
+		6BC11A6028EECBE90001FDF1 /* LitecoinKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = BitcoinKit;
+			productName = LitecoinKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

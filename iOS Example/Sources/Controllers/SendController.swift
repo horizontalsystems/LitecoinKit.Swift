@@ -1,6 +1,5 @@
 import UIKit
 import RxSwift
-import Hodler
 import BitcoinCore
 
 class SendController: UIViewController {
@@ -13,10 +12,6 @@ class SendController: UIViewController {
     @IBOutlet weak var timeLockSwitch: UISwitch?
     @IBOutlet weak var picker: UIPickerView?
 
-    private var timeIntervalStrings = ["Hour", "Month", "Half Year", "Year"]
-    private var timeIntervals: [HodlerPlugin.LockTimeInterval] = [.hour, .month, .halfYear, .year]
-    private var selectedTimeInterval: HodlerPlugin.LockTimeInterval = .hour
-
     private var adapters = [BaseAdapter]()
     private let segmentedControl = UISegmentedControl()
     private var timeLockEnabled = false
@@ -25,8 +20,6 @@ class SendController: UIViewController {
         super.viewDidLoad()
 
         segmentedControl.addTarget(self, action: #selector(onSegmentChanged), for: .valueChanged)
-        picker?.dataSource = self
-        picker?.delegate = self
 
         Manager.shared.adapterSignal
                 .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
@@ -70,12 +63,7 @@ class SendController: UIViewController {
             return
         }
         
-        var pluginData = [UInt8: IPluginData]()
-        if timeLockEnabled {
-            pluginData[HodlerPlugin.id] = HodlerData(lockTimeInterval: self.selectedTimeInterval)
-        }
-        
-        if let fee = currentAdapter?.fee(for: amount, address: address, pluginData: pluginData) {
+        if let fee = currentAdapter?.fee(for: amount, address: address, pluginData: [:]) {
             feeLabel?.text = "Fee: \(fee.formattedAmount)"
         }
     }
@@ -114,13 +102,8 @@ class SendController: UIViewController {
             } catch {
             }
         }
-
-        var pluginData = [UInt8: IPluginData]()
-        if timeLockEnabled {
-            pluginData[HodlerPlugin.id] = HodlerData(lockTimeInterval: self.selectedTimeInterval)
-        }
         
-        if let maxAmount = currentAdapter?.availableBalance(for: address, pluginData: pluginData) {
+        if let maxAmount = currentAdapter?.availableBalance(for: address, pluginData: [:]) {
             amountTextField?.text = "\(maxAmount)"
             onAmountEditEnded(0)
         }
@@ -160,12 +143,7 @@ class SendController: UIViewController {
             return
         }
         
-        var pluginData = [UInt8: IPluginData]()
-        if timeLockEnabled {
-            pluginData[HodlerPlugin.id] = HodlerData(lockTimeInterval: self.selectedTimeInterval)
-        }
-
-        currentAdapter?.sendSingle(to: address, amount: amount, sortType: .shuffle, pluginData: pluginData)
+        currentAdapter?.sendSingle(to: address, amount: amount, sortType: .shuffle, pluginData: [:])
                 .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .userInitiated))
                 .observeOn(MainScheduler.instance)
                 .subscribe(onSuccess: { [weak self] _ in
@@ -199,32 +177,4 @@ class SendController: UIViewController {
         return adapters[segmentedControl.selectedSegmentIndex]
     }
 
-}
-
-extension SendController: UIPickerViewDataSource {
-    public func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        1
-    }
-
-    public func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        timeIntervals.count
-    }
-}
-
-extension SendController: UIPickerViewDelegate {
-    public func pickerView(_ pickerView: UIPickerView, widthForComponent component: Int) -> CGFloat {
-        130
-    }
-
-    public func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
-        30
-    }
-
-    public func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        timeIntervalStrings[row]
-    }
-
-    public func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        selectedTimeInterval = timeIntervals[row]
-    }
 }

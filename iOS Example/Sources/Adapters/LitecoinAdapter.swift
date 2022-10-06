@@ -1,23 +1,23 @@
 import Foundation
-import BitcoinKit
+import LitecoinKit
 import BitcoinCore
 import HdWalletKit
 import HsToolKit
 import RxSwift
 
-class BitcoinAdapter: BaseAdapter {
-    let bitcoinKit: Kit
+class LitecoinAdapter: BaseAdapter {
+    let litecoinKit: Kit
 
     init(words: [String], bip: Bip, testMode: Bool, syncMode: BitcoinCore.SyncMode, logger: Logger) {
         let networkType: Kit.NetworkType = testMode ? .testNet : .mainNet
         guard let seed = Mnemonic.seed(mnemonic: words) else {
-            fatalError("Cant create BitcoinSeed")
+            fatalError("Can't Create Seed")
         }
 
-        bitcoinKit = try! Kit(seed: seed, bip: bip, walletId: "walletId", syncMode: syncMode, networkType: networkType, confirmationsThreshold: 1, logger: logger.scoped(with: "BitcoinKit"))
+        litecoinKit = try! Kit(seed: seed, bip: bip, walletId: "walletId", syncMode: syncMode, networkType: networkType, confirmationsThreshold: 1, logger: logger.scoped(with: "LitecoinKit"))
 
-        super.init(name: "Bitcoin", coinCode: "BTC", abstractKit: bitcoinKit)
-        bitcoinKit.delegate = self
+        super.init(name: "Litecoin", coinCode: "LTC", abstractKit: litecoinKit)
+        litecoinKit.delegate = self
     }
 
     class func clear() {
@@ -25,7 +25,7 @@ class BitcoinAdapter: BaseAdapter {
     }
 }
 
-extension BitcoinAdapter: BitcoinCoreDelegate {
+extension LitecoinAdapter: BitcoinCoreDelegate {
 
     func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo]) {
         transactionsSignal.notify()

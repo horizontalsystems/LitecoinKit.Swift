@@ -10,7 +10,7 @@ class WordsController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = "BitcoinKit Demo"
+        title = "LitecoinKit Demo"
 
         textView?.textContainerInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         textView?.layer.cornerRadius = 8

@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "607FACCF1AFB9204008FA782"
-               BuildableName = "BitcoinKit Demo.app"
+               BuildableName = "LitecoinKit Demo.app"
                BlueprintName = "iOS Example"
                ReferencedContainer = "container:iOS Example.xcodeproj">
             </BuildableReference>
@@ -45,7 +45,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "607FACCF1AFB9204008FA782"
-            BuildableName = "BitcoinKit Demo.app"
+            BuildableName = "LitecoinKit Demo.app"
             BlueprintName = "iOS Example"
             ReferencedContainer = "container:iOS Example.xcodeproj">
          </BuildableReference>
@@ -61,7 +61,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "607FACCF1AFB9204008FA782"
-            BuildableName = "BitcoinKit Demo.app"
+            BuildableName = "LitecoinKit Demo.app"
             BlueprintName = "iOS Example"
             ReferencedContainer = "container:iOS Example.xcodeproj">
          </BuildableReference>
