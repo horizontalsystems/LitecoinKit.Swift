@@ -19,9 +19,9 @@ public class Kit: AbstractKit {
         }
     }
 
-    public convenience init(seed: Data, bip: Bip, walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
+    public convenience init(seed: Data, purpose: Purpose, walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
         let version: HDExtendedKeyVersion
-        switch bip {
+        switch purpose {
         case .bip44: version = .Ltpv
         case .bip49: version = .Mtpv
         case .bip84: version = .zprv
@@ -29,7 +29,6 @@ public class Kit: AbstractKit {
         let masterPrivateKey = HDPrivateKey(seed: seed, xPrivKey: version.rawValue)
 
         try self.init(extendedKey: .private(key: masterPrivateKey),
-                bip: bip,
                 walletId: walletId,
                 syncMode: syncMode,
                 networkType: networkType,
@@ -37,7 +36,7 @@ public class Kit: AbstractKit {
                 logger: logger)
     }
 
-    public init(extendedKey: HDExtendedKey, bip: Bip, walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
+    public init(extendedKey: HDExtendedKey, walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
         let network: INetwork
         let initialSyncApiUrl: String
 
@@ -54,7 +53,8 @@ public class Kit: AbstractKit {
 
         let initialSyncApi = BCoinApi(url: initialSyncApiUrl, logger: logger)
 
-        let databaseFilePath = try DirectoryHelper.directoryURL(for: Kit.name).appendingPathComponent(Kit.databaseFileName(walletId: walletId, networkType: networkType, bip: bip, syncMode: syncMode)).path
+        let purpose = extendedKey.info.purpose
+        let databaseFilePath = try DirectoryHelper.directoryURL(for: Kit.name).appendingPathComponent(Kit.databaseFileName(walletId: walletId, networkType: networkType, purpose: purpose, syncMode: syncMode)).path
         let storage = GrdbStorage(databaseFilePath: databaseFilePath)
 
         let paymentAddressParser = PaymentAddressParser(validScheme: "litecoin", removeScheme: true)
@@ -94,7 +94,6 @@ public class Kit: AbstractKit {
                 .set(network: network)
                 .set(initialSyncApi: initialSyncApi)
                 .set(extendedKey: extendedKey)
-                .set(bip: bip)
                 .set(paymentAddressParser: paymentAddressParser)
                 .set(walletId: walletId)
                 .set(confirmationsThreshold: confirmationsThreshold)
@@ -110,7 +109,7 @@ public class Kit: AbstractKit {
 
         bitcoinCore.prepend(addressConverter: bech32AddressConverter)
 
-        switch bip {
+        switch purpose {
         case .bip44:
             bitcoinCore.add(restoreKeyConverter: Bip44RestoreKeyConverter(addressConverter: base58AddressConverter))
         case .bip49:
@@ -128,8 +127,8 @@ extension Kit {
         try DirectoryHelper.removeAll(inDirectory: Kit.name, except: walletIdsToExclude)
     }
 
-    private static func databaseFileName(walletId: String, networkType: NetworkType, bip: Bip, syncMode: BitcoinCore.SyncMode) -> String {
-        "\(walletId)-\(networkType.rawValue)-\(bip.description)-\(syncMode)"
+    private static func databaseFileName(walletId: String, networkType: NetworkType, purpose: Purpose, syncMode: BitcoinCore.SyncMode) -> String {
+        "\(walletId)-\(networkType.rawValue)-\(purpose.description)-\(syncMode)"
     }
 
 }
