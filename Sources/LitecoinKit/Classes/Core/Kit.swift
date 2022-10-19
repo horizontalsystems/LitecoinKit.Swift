@@ -1,6 +1,6 @@
 import Foundation
 import BitcoinCore
-//import HdWalletKit
+import HdWalletKit
 import RxSwift
 import HsToolKit
 
@@ -19,7 +19,25 @@ public class Kit: AbstractKit {
         }
     }
 
-    public init(seed: Data, bip: Bip, walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
+    public convenience init(seed: Data, bip: Bip, walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
+        let version: HDExtendedKeyVersion
+        switch bip {
+        case .bip44: version = .Ltpv
+        case .bip49: version = .Mtpv
+        case .bip84: version = .zprv
+        }
+        let masterPrivateKey = HDPrivateKey(seed: seed, xPrivKey: version.rawValue)
+
+        try self.init(extendedKey: .private(key: masterPrivateKey),
+                bip: bip,
+                walletId: walletId,
+                syncMode: syncMode,
+                networkType: networkType,
+                confirmationsThreshold: confirmationsThreshold,
+                logger: logger)
+    }
+
+    public init(extendedKey: HDExtendedKey, bip: Bip, walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
         let network: INetwork
         let initialSyncApiUrl: String
 
@@ -75,7 +93,7 @@ public class Kit: AbstractKit {
         let bitcoinCore = try BitcoinCoreBuilder(logger: logger)
                 .set(network: network)
                 .set(initialSyncApi: initialSyncApi)
-                .set(seed: seed)
+                .set(extendedKey: extendedKey)
                 .set(bip: bip)
                 .set(paymentAddressParser: paymentAddressParser)
                 .set(walletId: walletId)
