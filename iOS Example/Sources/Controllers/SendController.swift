@@ -1,9 +1,9 @@
+import Combine
 import UIKit
-import RxSwift
 import BitcoinCore
 
 class SendController: UIViewController {
-    private let disposeBag = DisposeBag()
+    private var cancellables = Set<AnyCancellable>()
 
     @IBOutlet weak var addressTextField: UITextField?
     @IBOutlet weak var amountTextField: UITextField?
@@ -21,13 +21,12 @@ class SendController: UIViewController {
 
         segmentedControl.addTarget(self, action: #selector(onSegmentChanged), for: .valueChanged)
 
-        Manager.shared.adapterSignal
-                .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
-                .observeOn(MainScheduler.instance)
-                .subscribe(onNext: { [weak self] in
+        Manager.shared.adapterSubject
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] in
                     self?.updateAdapters()
-                })
-                .disposed(by: disposeBag)
+                }
+                .store(in: &cancellables)
 
         updateAdapters()
     }
@@ -46,10 +45,10 @@ class SendController: UIViewController {
         segmentedControl.selectedSegmentIndex = 0
         segmentedControl.sendActions(for: .valueChanged)
     }
-    
+
     private func updateFee() {
         var address: String? = nil
-        
+
         if let addressStr = addressTextField?.text {
             do {
                 try currentAdapter?.validate(address: addressStr)
@@ -62,7 +61,7 @@ class SendController: UIViewController {
             feeLabel?.text = "Fee: "
             return
         }
-        
+
         if let fee = currentAdapter?.fee(for: amount, address: address, pluginData: [:]) {
             feeLabel?.text = "Fee: \(fee.formattedAmount)"
         }
@@ -73,28 +72,28 @@ class SendController: UIViewController {
 
         view.endEditing(true)
     }
-    
+
     @objc func onSegmentChanged() {
         coinLabel?.text = currentAdapter?.coinCode
         updateFee()
     }
-    
+
     @IBAction func onAddressEditEnded(_ sender: Any) {
         updateFee()
     }
-    
+
     @IBAction func onAmountEditEnded(_ sender: Any) {
         updateFee()
     }
-    
+
     @IBAction func onTimeLockSwitchToggle(_ sender: Any) {
         timeLockEnabled = !timeLockEnabled
         updateFee()
     }
-    
+
     @IBAction func setMaxAmount() {
         var address: String? = nil
-        
+
         if let addressStr = addressTextField?.text {
             do {
                 try currentAdapter?.validate(address: addressStr)
@@ -102,16 +101,16 @@ class SendController: UIViewController {
             } catch {
             }
         }
-        
+
         if let maxAmount = currentAdapter?.availableBalance(for: address, pluginData: [:]) {
             amountTextField?.text = "\(maxAmount)"
             onAmountEditEnded(0)
         }
     }
-    
+
     @IBAction func setMinAmount() {
         var address: String? = nil
-        
+
         if let addressStr = addressTextField?.text {
             do {
                 try currentAdapter?.validate(address: addressStr)
@@ -142,19 +141,17 @@ class SendController: UIViewController {
             show(error: "Invalid amount")
             return
         }
-        
-        currentAdapter?.sendSingle(to: address, amount: amount, sortType: .shuffle, pluginData: [:])
-                .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .userInitiated))
-                .observeOn(MainScheduler.instance)
-                .subscribe(onSuccess: { [weak self] _ in
-                    self?.addressTextField?.text = ""
-                    self?.amountTextField?.text = ""
 
-                    self?.showSuccess(address: address, amount: amount)
-                }, onError: { [weak self] error in
-                    self?.show(error: "Send failed: \(error)")
-                })
-                .disposed(by: disposeBag)
+        do {
+            try currentAdapter?.send(to: address, amount: amount, sortType: .shuffle, pluginData: [:])
+
+            addressTextField?.text = ""
+            amountTextField?.text = ""
+
+            showSuccess(address: address, amount: amount)
+        } catch {
+            show(error: "Send failed: \(error)")
+        }
     }
 
     private func show(error: String) {

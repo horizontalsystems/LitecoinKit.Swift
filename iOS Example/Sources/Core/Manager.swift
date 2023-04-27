@@ -1,5 +1,5 @@
 import Foundation
-import RxSwift
+import Combine
 import BitcoinCore
 import HsToolKit
 
@@ -10,7 +10,7 @@ class Manager {
     private let keyWords = "mnemonic_words"
     private let syncModeKey = "syncMode"
 
-    let adapterSignal = Signal()
+    let adapterSubject = PassthroughSubject<Void, Never>()
     var adapters = [BaseAdapter]()
 
     init() {
@@ -44,7 +44,7 @@ class Manager {
             LitecoinAdapter(words: words, purpose: .bip44, testMode: configuration.testNet, syncMode: syncMode, logger: logger),
         ]
 
-        adapterSignal.notify()
+        adapterSubject.send()
     }
 
     var savedWords: [String]? {
