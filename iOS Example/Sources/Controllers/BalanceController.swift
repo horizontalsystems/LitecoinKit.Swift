@@ -1,9 +1,9 @@
+import Combine
 import UIKit
-import RxSwift
 
 class BalanceController: UITableViewController {
-    private let disposeBag = DisposeBag()
-    private var adapterDisposeBag = DisposeBag()
+    private var cancellables = Set<AnyCancellable>()
+    private var adapterCancellables = Set<AnyCancellable>()
 
     private var adapters = [BaseAdapter]()
 
@@ -19,13 +19,12 @@ class BalanceController: UITableViewController {
 
         tableView.estimatedRowHeight = 0
 
-        Manager.shared.adapterSignal
-                .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
-                .observeOn(MainScheduler.instance)
-                .subscribe(onNext: { [weak self] in
+        Manager.shared.adapterSubject
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] in
                     self?.updateAdapters()
-                })
-                .disposed(by: disposeBag)
+                }
+                .store(in: &cancellables)
 
         updateAdapters()
     }
@@ -34,16 +33,15 @@ class BalanceController: UITableViewController {
         adapters = Manager.shared.adapters
         tableView.reloadData()
 
-        adapterDisposeBag = DisposeBag()
+        adapterCancellables = Set()
 
         for (index, adapter) in adapters.enumerated() {
-            Observable.merge([adapter.lastBlockObservable, adapter.syncStateObservable, adapter.balanceObservable])
-                    .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
-                    .observeOn(MainScheduler.instance)
-                    .subscribe(onNext: { [weak self] in
+            Publishers.MergeMany(adapter.lastBlockPublisher, adapter.syncStatePublisher, adapter.balancePublisher)
+                    .receive(on: DispatchQueue.main)
+                    .sink { [weak self] in
                         self?.update(index: index)
-                    })
-                    .disposed(by: adapterDisposeBag)
+                    }
+                    .store(in: &adapterCancellables)
         }
     }
 
@@ -70,19 +68,19 @@ class BalanceController: UITableViewController {
     }
 
     @IBAction func showDebugInfo() {
-//        print(Manager.shared.ethereumKit.debugInfo)
+        //        print(Manager.shared.ethereumKit.debugInfo)
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return adapters.count
+        adapters.count
     }
 
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 220
+        220
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return tableView.dequeueReusableCell(withIdentifier: String(describing: BalanceCell.self), for: indexPath)
+        tableView.dequeueReusableCell(withIdentifier: String(describing: BalanceCell.self), for: indexPath)
     }
 
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {

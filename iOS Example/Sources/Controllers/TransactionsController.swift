@@ -1,9 +1,9 @@
+import Combine
 import UIKit
-import RxSwift
 
 class TransactionsController: UITableViewController {
-    private let disposeBag = DisposeBag()
-    private var adapterDisposeBag = DisposeBag()
+    private var cancellables = Set<AnyCancellable>()
+    private var adapterCancellables = Set<AnyCancellable>()
 
     private var adapters = [BaseAdapter]()
     private var transactions = [TransactionRecord]()
@@ -24,13 +24,12 @@ class TransactionsController: UITableViewController {
 
         segmentedControl.addTarget(self, action: #selector(onSegmentChanged), for: .valueChanged)
 
-        Manager.shared.adapterSignal
-                .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
-                .observeOn(MainScheduler.instance)
-                .subscribe(onNext: { [weak self] in
+        Manager.shared.adapterSubject
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] in
                     self?.updateAdapters()
-                })
-                .disposed(by: disposeBag)
+                }
+                .store(in: &cancellables)
 
         updateAdapters()
     }
@@ -40,26 +39,24 @@ class TransactionsController: UITableViewController {
 
         adapters = Manager.shared.adapters
 
-        adapterDisposeBag = DisposeBag()
+        adapterCancellables = Set()
 
         for (index, adapter) in adapters.enumerated() {
             segmentedControl.insertSegment(withTitle: adapter.coinCode, at: index, animated: false)
 
-            adapter.lastBlockObservable
-                    .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
-                    .observeOn(MainScheduler.instance)
-                    .subscribe(onNext: { [weak self] in
+            adapter.lastBlockPublisher
+                    .receive(on: DispatchQueue.main)
+                    .sink { [weak self] in
                         self?.onLastBlockHeightUpdated(index: index)
-                    })
-                    .disposed(by: adapterDisposeBag)
+                    }
+                    .store(in: &adapterCancellables)
 
-            adapter.transactionsObservable
-                    .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
-                    .observeOn(MainScheduler.instance)
-                    .subscribe(onNext: { [weak self] in
+            adapter.transactionsPublisher
+                    .receive(on: DispatchQueue.main)
+                    .sink { [weak self] in
                         self?.onTransactionsUpdated(index: index)
-                    })
-                    .disposed(by: adapterDisposeBag)
+                    }
+                    .store(in: &adapterCancellables)
         }
 
         navigationItem.titleView = segmentedControl
@@ -133,13 +130,9 @@ class TransactionsController: UITableViewController {
 
         let fromUid = transactions.last?.uid
 
-        currentAdapter?.transactionsSingle(fromUid: fromUid, limit: limit)
-                .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
-                .observeOn(MainScheduler.instance)
-                .subscribe(onSuccess: { [weak self] transactions in
-                    self?.onLoad(transactions: transactions)
-                })
-                .disposed(by: disposeBag)
+        if let transactions = currentAdapter?.transactions(fromUid: fromUid, limit: limit) {
+            onLoad(transactions: transactions)
+        }
     }
 
     private func onLoad(transactions: [TransactionRecord]) {

@@ -1,9 +1,7 @@
-import Foundation
 import LitecoinKit
 import BitcoinCore
-import HdWalletKit
 import HsToolKit
-import RxSwift
+import HdWalletKit
 
 class LitecoinAdapter: BaseAdapter {
     let litecoinKit: Kit
@@ -28,23 +26,23 @@ class LitecoinAdapter: BaseAdapter {
 extension LitecoinAdapter: BitcoinCoreDelegate {
 
     func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo]) {
-        transactionsSignal.notify()
+        transactionsSubject.send()
     }
 
     func transactionsDeleted(hashes: [String]) {
-        transactionsSignal.notify()
+        transactionsSubject.send()
     }
 
     func balanceUpdated(balance: BalanceInfo) {
-        balanceSignal.notify()
+        balanceSubject.send()
     }
 
     func lastBlockInfoUpdated(lastBlockInfo: BlockInfo) {
-        lastBlockSignal.notify()
+        lastBlockSubject.send()
     }
 
     public func kitStateUpdated(state: BitcoinCore.KitState) {
-        syncStateSignal.notify()
+        syncStateSubject.send()
     }
 
 }

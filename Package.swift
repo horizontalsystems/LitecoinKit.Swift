@@ -13,16 +13,14 @@ let package = Package(
             targets: ["LitecoinKit"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/horizontalsystems/BitcoinCore.Swift.git", .upToNextMajor(from: "1.1.0")),
+        .package(url: "https://github.com/horizontalsystems/BitcoinCore.Swift.git", .upToNextMajor(from: "2.0.0")),
         .package(url: "https://github.com/greymass/swift-scrypt.git", from: "1.0.0"),
-        .package(url: "https://github.com/horizontalsystems/HsToolKit.Swift.git", .upToNextMajor(from: "1.0.0")),
-        .package(url: "https://github.com/ReactiveX/RxSwift.git", .upToNextMajor(from: "5.0.1")),
+        .package(url: "https://github.com/horizontalsystems/HsToolKit.Swift.git", .upToNextMajor(from: "2.0.0")),
     ],
     targets: [
         .target(
             name: "LitecoinKit",
             dependencies: [
-                "RxSwift",
                 .product(name: "Scrypt", package: "swift-scrypt"),
                 .product(name: "BitcoinCore", package: "BitcoinCore.Swift"),
                 .product(name: "HsToolKit", package: "HsToolKit.Swift"),
