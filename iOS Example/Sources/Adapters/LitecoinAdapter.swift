@@ -12,7 +12,7 @@ class LitecoinAdapter: BaseAdapter {
             fatalError("Can't Create Seed")
         }
 
-        litecoinKit = try! Kit(seed: seed, purpose: purpose, walletId: "walletId", syncMode: syncMode, networkType: networkType, confirmationsThreshold: 1, logger: logger.scoped(with: "LitecoinKit"))
+        litecoinKit = try! Kit(seed: seed, purpose: purpose, walletId: "walletId", syncMode: syncMode, hasher: nil, networkType: networkType, confirmationsThreshold: 1, logger: logger.scoped(with: "LitecoinKit"))
 
         super.init(name: "Litecoin", coinCode: "LTC", abstractKit: litecoinKit)
         litecoinKit.delegate = self
