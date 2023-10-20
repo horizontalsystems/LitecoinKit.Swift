@@ -1,12 +1,27 @@
-import Foundation
 import BitcoinCore
+import Foundation
 import HdWalletKit
 import HsToolKit
+import Scrypt
 
 public class Kit: AbstractKit {
-    private static let heightInterval = 2016                                    // Default block count in difficulty change circle
-    private static let targetSpacing = Int(2.5 * 60)                            // Time to mining one block
-    private static let maxTargetBits = 0x1e0fffff                               // Initially and max. target difficulty for blocks
+    private static let heightInterval = 2016 // Default block count in difficulty change circle
+    private static let targetSpacing = Int(2.5 * 60) // Time to mining one block
+    private static let maxTargetBits = 0x1E0F_FFFF // Initially and max. target difficulty for blocks
+
+    public static let defaultScryptParams = (length: 32, N: UInt64(1024), r: UInt32(1), p: UInt32(1))
+    static let defaultHasher: (Data) -> Data = { data in
+        let pass = data.hs.bytes
+        let bytes = try? Scrypt.scrypt(
+            password: pass,
+            salt: pass,
+            length: defaultScryptParams.length,
+            N: defaultScryptParams.N,
+            r: defaultScryptParams.r,
+            p: defaultScryptParams.p
+        )
+        return Data(bytes ?? [])
+    }
 
     private static let name = "LitecoinKit"
 
@@ -18,7 +33,7 @@ public class Kit: AbstractKit {
         }
     }
 
-    public convenience init(seed: Data, purpose: Purpose, walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
+    public convenience init(seed: Data, purpose: Purpose, walletId: String, syncMode: BitcoinCore.SyncMode = .api, hasher: ((Data) -> Data)?, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
         let version: HDExtendedKeyVersion
         switch purpose {
         case .bip44: version = .Ltpv
@@ -28,26 +43,29 @@ public class Kit: AbstractKit {
         }
         let masterPrivateKey = HDPrivateKey(seed: seed, xPrivKey: version.rawValue)
 
-        try self.init(extendedKey: .private(key: masterPrivateKey),
-                purpose: purpose,
-                walletId: walletId,
-                syncMode: syncMode,
-                networkType: networkType,
-                confirmationsThreshold: confirmationsThreshold,
-                logger: logger)
+        try self.init(
+            extendedKey: .private(key: masterPrivateKey),
+            purpose: purpose,
+            walletId: walletId,
+            syncMode: syncMode,
+            hasher: hasher,
+            networkType: networkType,
+            confirmationsThreshold: confirmationsThreshold,
+            logger: logger
+        )
     }
 
-    public init(extendedKey: HDExtendedKey, purpose: Purpose, walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
+    public init(extendedKey: HDExtendedKey, purpose: Purpose, walletId: String, syncMode: BitcoinCore.SyncMode = .api, hasher: ((Data) -> Data)?, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
         let network: INetwork
         let initialSyncApiUrl: String
 
         switch networkType {
-            case .mainNet:
-                network = MainNet()
-                initialSyncApiUrl = "https://ltc.horizontalsystems.xyz/api"
-            case .testNet:
-                network = TestNet()
-                initialSyncApiUrl = ""
+        case .mainNet:
+            network = MainNet()
+            initialSyncApiUrl = "https://ltc.horizontalsystems.xyz/api"
+        case .testNet:
+            network = TestNet()
+            initialSyncApiUrl = ""
         }
 
         let logger = logger ?? Logger(minLogLevel: .verbose)
@@ -65,18 +83,18 @@ public class Kit: AbstractKit {
         let difficultyEncoder = DifficultyEncoder()
 
         let blockValidatorSet = BlockValidatorSet()
-        let scryptHasher = ScryptHasher()
-        blockValidatorSet.add(blockValidator: ProofOfWorkValidator(hasher: scryptHasher, difficultyEncoder: difficultyEncoder))
+        let hasher = hasher ?? Self.defaultHasher
+        blockValidatorSet.add(blockValidator: ProofOfWorkValidator(hasher: hasher, difficultyEncoder: difficultyEncoder))
 
         let blockValidatorChain = BlockValidatorChain()
         let blockHelper = BlockValidatorHelper(storage: storage)
 
         let difficultyAdjustmentValidator = LegacyDifficultyAdjustmentValidator(
-                encoder: difficultyEncoder,
-                blockValidatorHelper: blockHelper,
-                heightInterval: Kit.heightInterval,
-                targetTimespan: Kit.heightInterval * Kit.targetSpacing,
-                maxTargetBits: Kit.maxTargetBits
+            encoder: difficultyEncoder,
+            blockValidatorHelper: blockHelper,
+            heightInterval: Kit.heightInterval,
+            targetTimespan: Kit.heightInterval * Kit.targetSpacing,
+            maxTargetBits: Kit.maxTargetBits
         )
 
         switch networkType {
@@ -91,18 +109,18 @@ public class Kit: AbstractKit {
         blockValidatorSet.add(blockValidator: blockValidatorChain)
 
         let bitcoinCore = try BitcoinCoreBuilder(logger: logger)
-                .set(network: network)
-                .set(initialSyncApi: initialSyncApi)
-                .set(extendedKey: extendedKey)
-                .set(paymentAddressParser: paymentAddressParser)
-                .set(walletId: walletId)
-                .set(confirmationsThreshold: confirmationsThreshold)
-                .set(peerSize: 10)
-                .set(syncMode: syncMode)
-                .set(storage: storage)
-                .set(blockValidator: blockValidatorSet)
-                .set(purpose: purpose)
-                .build()
+            .set(network: network)
+            .set(initialSyncApi: initialSyncApi)
+            .set(extendedKey: extendedKey)
+            .set(paymentAddressParser: paymentAddressParser)
+            .set(walletId: walletId)
+            .set(confirmationsThreshold: confirmationsThreshold)
+            .set(peerSize: 10)
+            .set(syncMode: syncMode)
+            .set(storage: storage)
+            .set(blockValidator: blockValidatorSet)
+            .set(purpose: purpose)
+            .build()
 
         super.init(bitcoinCore: bitcoinCore, network: network)
 
@@ -121,11 +139,9 @@ public class Kit: AbstractKit {
             bitcoinCore.add(restoreKeyConverter: KeyHashRestoreKeyConverter(scriptType: .p2tr))
         }
     }
-
 }
 
 extension Kit {
-
     public static func clear(exceptFor walletIdsToExclude: [String] = []) throws {
         try DirectoryHelper.removeAll(inDirectory: Kit.name, except: walletIdsToExclude)
     }
@@ -133,5 +149,4 @@ extension Kit {
     private static func databaseFileName(walletId: String, networkType: NetworkType, purpose: Purpose, syncMode: BitcoinCore.SyncMode) -> String {
         "\(walletId)-\(networkType.rawValue)-\(purpose.description)-\(syncMode)"
     }
-
 }
