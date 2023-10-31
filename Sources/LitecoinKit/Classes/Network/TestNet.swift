@@ -14,6 +14,7 @@ class TestNet: INetwork {
     let coinType: UInt32 = 1
     let sigHash: SigHashType = .bitcoinAll
     var syncableFromApi: Bool = false
+    var blockchairChainId: String = ""
 
     let dnsSeeds = [
         "testnet-seed.ltc.xurious.com",
