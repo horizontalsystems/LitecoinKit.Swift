@@ -62,7 +62,7 @@ public class Kit: AbstractKit {
         switch networkType {
         case .mainNet:
             network = MainNet()
-            initialSyncApiUrl = "https://ltc.horizontalsystems.xyz/api"
+            initialSyncApiUrl = "https://ltc.blocksdecoded.com/api"
         case .testNet:
             network = TestNet()
             initialSyncApiUrl = ""
