@@ -14,6 +14,7 @@ public class MainNet: INetwork {
     public let coinType: UInt32 = 2
     public let sigHash: SigHashType = .bitcoinAll
     public var syncableFromApi: Bool = true
+    public var blockchairChainId: String = "litecoin"
 
     public let dnsSeeds = [
         "x5.dnsseed.thrasher.io",
