@@ -73,7 +73,7 @@ public class Kit: AbstractKit {
         let apiTransactionProvider: IApiTransactionProvider
         switch networkType {
             case .mainNet:
-                let apiTransactionProviderUrl = "https://ltc.horizontalsystems.xyz/api"
+                let apiTransactionProviderUrl = "https://ltc.blocksdecoded.com/api"
 
                 if case .blockchair(let key) = syncMode {
                     let blockchairApi = BlockchairApi(secretKey: key, chainId: network.blockchairChainId, logger: logger)
