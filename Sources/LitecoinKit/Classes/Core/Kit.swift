@@ -30,10 +30,10 @@ public class Kit: AbstractKit {
 
         var network: INetwork {
             switch self {
-                case .mainNet:
-                    return MainNet()
-                case .testNet:
-                    return TestNet()
+            case .mainNet:
+                return MainNet()
+            case .testNet:
+                return TestNet()
             }
         }
     }
@@ -53,22 +53,22 @@ public class Kit: AbstractKit {
 
         let apiTransactionProvider: IApiTransactionProvider
         switch networkType {
-            case .mainNet:
-                let apiTransactionProviderUrl = "https://ltc.blocksdecoded.com/api"
+        case .mainNet:
+            let apiTransactionProviderUrl = "https://ltc.blocksdecoded.com/api"
 
-                if case .blockchair(let key) = syncMode {
-                    let blockchairApi = BlockchairApi(secretKey: key, chainId: network.blockchairChainId, logger: logger)
-                    let blockchairBlockHashFetcher = BlockchairBlockHashFetcher(blockchairApi: blockchairApi)
-                    let blockchairProvider = BlockchairTransactionProvider(blockchairApi: blockchairApi, blockHashFetcher: blockchairBlockHashFetcher)
-                    let bCoinApiProvider = BCoinApi(url: apiTransactionProviderUrl, logger: logger)
+            if case let .blockchair(key) = syncMode {
+                let blockchairApi = BlockchairApi(secretKey: key, chainId: network.blockchairChainId, logger: logger)
+                let blockchairBlockHashFetcher = BlockchairBlockHashFetcher(blockchairApi: blockchairApi)
+                let blockchairProvider = BlockchairTransactionProvider(blockchairApi: blockchairApi, blockHashFetcher: blockchairBlockHashFetcher)
+                let bCoinApiProvider = BCoinApi(url: apiTransactionProviderUrl, logger: logger)
 
-                    apiTransactionProvider = BiApiBlockProvider(restoreProvider: bCoinApiProvider, syncProvider: blockchairProvider, apiSyncStateManager: apiSyncStateManager)
-                } else {
-                    apiTransactionProvider = BCoinApi(url: apiTransactionProviderUrl, logger: logger)
-                }
+                apiTransactionProvider = BiApiBlockProvider(restoreProvider: bCoinApiProvider, syncProvider: blockchairProvider, apiSyncStateManager: apiSyncStateManager)
+            } else {
+                apiTransactionProvider = BCoinApi(url: apiTransactionProviderUrl, logger: logger)
+            }
 
-            case .testNet:
-                apiTransactionProvider = BCoinApi(url: "", logger: logger)
+        case .testNet:
+            apiTransactionProvider = BCoinApi(url: "", logger: logger)
         }
 
         let paymentAddressParser = PaymentAddressParser(validScheme: "litecoin", removeScheme: true)
@@ -90,12 +90,12 @@ public class Kit: AbstractKit {
         )
 
         switch networkType {
-            case .mainNet:
-                blockValidatorChain.add(blockValidator: difficultyAdjustmentValidator)
-                blockValidatorChain.add(blockValidator: BitsValidator())
-            case .testNet:
-                blockValidatorChain.add(blockValidator: difficultyAdjustmentValidator)
-                blockValidatorChain.add(blockValidator: LegacyTestNetDifficultyValidator(blockHelper: blockHelper, heightInterval: Kit.heightInterval, targetSpacing: Kit.targetSpacing, maxTargetBits: Kit.maxTargetBits))
+        case .mainNet:
+            blockValidatorChain.add(blockValidator: difficultyAdjustmentValidator)
+            blockValidatorChain.add(blockValidator: BitsValidator())
+        case .testNet:
+            blockValidatorChain.add(blockValidator: difficultyAdjustmentValidator)
+            blockValidatorChain.add(blockValidator: LegacyTestNetDifficultyValidator(blockHelper: blockHelper, heightInterval: Kit.heightInterval, targetSpacing: Kit.targetSpacing, maxTargetBits: Kit.maxTargetBits))
         }
 
         blockValidatorSet.add(blockValidator: blockValidatorChain)
@@ -118,18 +118,18 @@ public class Kit: AbstractKit {
             .build()
 
         super.init(bitcoinCore: bitcoinCore, network: network)
-        
+
         let base58AddressConverter = Base58AddressConverter(addressVersion: network.pubKeyHash, addressScriptVersion: network.scriptHash)
 
         switch purpose {
-            case .bip44:
-                bitcoinCore.add(restoreKeyConverter: Bip44RestoreKeyConverter(addressConverter: base58AddressConverter))
-            case .bip49:
-                bitcoinCore.add(restoreKeyConverter: Bip49RestoreKeyConverter(addressConverter: base58AddressConverter))
-            case .bip84:
-                bitcoinCore.add(restoreKeyConverter: KeyHashRestoreKeyConverter(scriptType: .p2wpkh))
-            case .bip86:
-                bitcoinCore.add(restoreKeyConverter: KeyHashRestoreKeyConverter(scriptType: .p2tr))
+        case .bip44:
+            bitcoinCore.add(restoreKeyConverter: Bip44RestoreKeyConverter(addressConverter: base58AddressConverter))
+        case .bip49:
+            bitcoinCore.add(restoreKeyConverter: Bip49RestoreKeyConverter(addressConverter: base58AddressConverter))
+        case .bip84:
+            bitcoinCore.add(restoreKeyConverter: KeyHashRestoreKeyConverter(scriptType: .p2wpkh))
+        case .bip86:
+            bitcoinCore.add(restoreKeyConverter: KeyHashRestoreKeyConverter(scriptType: .p2tr))
         }
     }
 
@@ -157,7 +157,7 @@ public class Kit: AbstractKit {
 
     public convenience init(extendedKey: HDExtendedKey, purpose: Purpose, walletId: String, syncMode: BitcoinCore.SyncMode = .api, hasher: ((Data) -> Data)?, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
         let network = networkType.network
-        
+
         try self.init(extendedKey: extendedKey, watchAddressPublicKey: nil,
                       purpose: purpose,
                       walletId: walletId,
@@ -193,7 +193,6 @@ public class Kit: AbstractKit {
                       networkType: networkType,
                       confirmationsThreshold: confirmationsThreshold,
                       logger: logger)
-
 
         bitcoinCore.prepend(addressConverter: bech32AddressConverter)
     }

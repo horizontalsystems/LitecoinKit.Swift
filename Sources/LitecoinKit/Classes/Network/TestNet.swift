@@ -3,13 +3,13 @@ import BitcoinCore
 class TestNet: INetwork {
     let bundleName = "Litecoin"
 
-    let pubKeyHash: UInt8 = 0x6f
-    let privateKey: UInt8 = 0xef
-    let scriptHash: UInt8 = 0x3a
+    let pubKeyHash: UInt8 = 0x6F
+    let privateKey: UInt8 = 0xEF
+    let scriptHash: UInt8 = 0x3A
     let bech32PrefixPattern: String = "tltc"
-    let xPubKey: UInt32 = 0x043587cf
-    let xPrivKey: UInt32 = 0x04358394
-    let magic: UInt32 = 0xfdd2c8f1
+    let xPubKey: UInt32 = 0x0435_87CF
+    let xPrivKey: UInt32 = 0x0435_8394
+    let magic: UInt32 = 0xFDD2_C8F1
     let port = 19335
     let coinType: UInt32 = 1
     let sigHash: SigHashType = .bitcoinAll

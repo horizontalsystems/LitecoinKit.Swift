@@ -24,9 +24,9 @@ class LegacyDifficultyAdjustmentValidator: IBlockChainedValidator {
         }
 
         var timespan = previousBlock.timestamp - beforeFirstBlock.timestamp
-        if (timespan < targetTimespan / 4) {
+        if timespan < targetTimespan / 4 {
             timespan = targetTimespan / 4
-        } else if (timespan > targetTimespan * 4) {
+        } else if timespan > targetTimespan * 4 {
             timespan = targetTimespan * 4
         }
 
@@ -45,8 +45,7 @@ class LegacyDifficultyAdjustmentValidator: IBlockChainedValidator {
         }
     }
 
-    func isBlockValidatable(block: Block, previousBlock: Block) -> Bool {
+    func isBlockValidatable(block: Block, previousBlock _: Block) -> Bool {
         block.height % heightInterval == 0
     }
-
 }

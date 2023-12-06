@@ -20,11 +20,11 @@ class BalanceController: UITableViewController {
         tableView.estimatedRowHeight = 0
 
         Manager.shared.adapterSubject
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] in
-                    self?.updateAdapters()
-                }
-                .store(in: &cancellables)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                self?.updateAdapters()
+            }
+            .store(in: &cancellables)
 
         updateAdapters()
     }
@@ -37,18 +37,18 @@ class BalanceController: UITableViewController {
 
         for (index, adapter) in adapters.enumerated() {
             Publishers.MergeMany(adapter.lastBlockPublisher, adapter.syncStatePublisher, adapter.balancePublisher)
-                    .receive(on: DispatchQueue.main)
-                    .sink { [weak self] in
-                        self?.update(index: index)
-                    }
-                    .store(in: &adapterCancellables)
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] in
+                    self?.update(index: index)
+                }
+                .store(in: &adapterCancellables)
         }
     }
 
     @objc func logout() {
         Manager.shared.logout()
 
-        if let window = UIApplication.shared.windows.filter({$0.isKeyWindow}).first {
+        if let window = UIApplication.shared.windows.filter(\.isKeyWindow).first {
             UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve, animations: {
                 window.rootViewController = UINavigationController(rootViewController: WordsController())
             })
@@ -71,11 +71,11 @@ class BalanceController: UITableViewController {
         //        print(Manager.shared.ethereumKit.debugInfo)
     }
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
         adapters.count
     }
 
-    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+    override func tableView(_: UITableView, heightForRowAt _: IndexPath) -> CGFloat {
         220
     }
 
@@ -83,7 +83,7 @@ class BalanceController: UITableViewController {
         tableView.dequeueReusableCell(withIdentifier: String(describing: BalanceCell.self), for: indexPath)
     }
 
-    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+    override func tableView(_: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if let cell = cell as? BalanceCell {
             cell.bind(adapter: adapters[indexPath.row])
         }
@@ -92,5 +92,4 @@ class BalanceController: UITableViewController {
     private func update(index: Int) {
         tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .none)
     }
-
 }

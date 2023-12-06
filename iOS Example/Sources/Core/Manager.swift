@@ -1,6 +1,6 @@
-import Foundation
-import Combine
 import BitcoinCore
+import Combine
+import Foundation
 import HsToolKit
 
 class Manager {
@@ -80,5 +80,4 @@ class Manager {
     private func clearKits() {
         LitecoinAdapter.clear()
     }
-
 }
