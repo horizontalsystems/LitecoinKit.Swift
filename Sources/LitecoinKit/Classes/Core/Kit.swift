@@ -52,12 +52,13 @@ public class Kit: AbstractKit {
         let apiSyncStateManager = ApiSyncStateManager(storage: storage, restoreFromApi: network.syncableFromApi && syncMode != BitcoinCore.SyncMode.full)
 
         let apiTransactionProvider: IApiTransactionProvider
+        let blockchairApi = BlockchairApi(chainId: network.blockchairChainId, logger: logger)
+        let sendType = BitcoinCore.SendType.api(blockchairApi: blockchairApi)
         switch networkType {
         case .mainNet:
             let apiTransactionProviderUrl = "https://ltc.blocksdecoded.com/api"
 
             if case .blockchair = syncMode {
-                let blockchairApi = BlockchairApi(chainId: network.blockchairChainId, logger: logger)
                 let blockchairBlockHashFetcher = BlockchairBlockHashFetcher(blockchairApi: blockchairApi)
                 let blockchairProvider = BlockchairTransactionProvider(blockchairApi: blockchairApi, blockHashFetcher: blockchairBlockHashFetcher)
                 let bCoinApiProvider = BCoinApi(url: apiTransactionProviderUrl, logger: logger)
@@ -112,6 +113,7 @@ public class Kit: AbstractKit {
             .set(confirmationsThreshold: confirmationsThreshold)
             .set(peerSize: 10)
             .set(syncMode: syncMode)
+            .set(sendType: sendType)
             .set(storage: storage)
             .set(blockValidator: blockValidatorSet)
             .set(purpose: purpose)
