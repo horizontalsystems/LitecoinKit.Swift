@@ -56,17 +56,9 @@ public class Kit: AbstractKit {
         let sendType = BitcoinCore.SendType.api(blockchairApi: blockchairApi)
         switch networkType {
         case .mainNet:
-            let apiTransactionProviderUrl = "https://ltc.blocksdecoded.com/api"
+            let blockchairBlockHashFetcher = BlockchairBlockHashFetcher(blockchairApi: blockchairApi)
 
-            if case .blockchair = syncMode {
-                let blockchairBlockHashFetcher = BlockchairBlockHashFetcher(blockchairApi: blockchairApi)
-                let blockchairProvider = BlockchairTransactionProvider(blockchairApi: blockchairApi, blockHashFetcher: blockchairBlockHashFetcher)
-                let bCoinApiProvider = BCoinApi(url: apiTransactionProviderUrl, logger: logger)
-
-                apiTransactionProvider = BiApiBlockProvider(restoreProvider: bCoinApiProvider, syncProvider: blockchairProvider, apiSyncStateManager: apiSyncStateManager)
-            } else {
-                apiTransactionProvider = BCoinApi(url: apiTransactionProviderUrl, logger: logger)
-            }
+            apiTransactionProvider = BlockchairTransactionProvider(blockchairApi: blockchairApi, blockHashFetcher: blockchairBlockHashFetcher)
 
         case .testNet:
             apiTransactionProvider = BCoinApi(url: "", logger: logger)
@@ -121,7 +113,9 @@ public class Kit: AbstractKit {
 
         super.init(bitcoinCore: bitcoinCore, network: network)
 
+        let scriptConverter = ScriptConverter()
         let base58AddressConverter = Base58AddressConverter(addressVersion: network.pubKeyHash, addressScriptVersion: network.scriptHash)
+        let bech32AddressConverter = SegWitBech32AddressConverter(prefix: network.bech32PrefixPattern, scriptConverter: scriptConverter)
 
         switch purpose {
         case .bip44:
@@ -129,9 +123,9 @@ public class Kit: AbstractKit {
         case .bip49:
             bitcoinCore.add(restoreKeyConverter: Bip49RestoreKeyConverter(addressConverter: base58AddressConverter))
         case .bip84:
-            bitcoinCore.add(restoreKeyConverter: KeyHashRestoreKeyConverter(scriptType: .p2wpkh))
+            bitcoinCore.add(restoreKeyConverter: Bip84RestoreKeyConverter(addressConverter: bech32AddressConverter))
         case .bip86:
-            bitcoinCore.add(restoreKeyConverter: KeyHashRestoreKeyConverter(scriptType: .p2tr))
+            bitcoinCore.add(restoreKeyConverter: Bip86RestoreKeyConverter(addressConverter: bech32AddressConverter))
         }
     }
 
