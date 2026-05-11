@@ -17,6 +17,7 @@ public class MainNet: INetwork {
     public var blockchairChainId: String = "litecoin"
 
     public let dnsSeeds = [
+        "ltc.unstoppable.money",
         "x5.dnsseed.thrasher.io",
         "x5.dnsseed.litecointools.com",
         "x5.dnsseed.litecoinpool.org",
